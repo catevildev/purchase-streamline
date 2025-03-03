@@ -23,22 +23,41 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
     queryKey: ["/api/products"]
   });
 
+  const formatDate = (date: Date | null | undefined) => {
+    if (!date) return "";
+    return new Date(date).toISOString().split('T')[0];
+  };
+
   const form = useForm<InsertQuote>({
     resolver: zodResolver(insertQuoteSchema),
-    defaultValues: quote || {
+    defaultValues: quote ? {
+      productId: quote.productId,
+      quantity: quote.quantity.toString(),
+      unit: quote.unit,
+      responsible: quote.responsible,
+      supplier1: quote.supplier1 ?? "",
+      price1: quote.price1?.toString() ?? "0",
+      date1: formatDate(quote.date1),
+      supplier2: quote.supplier2 ?? "",
+      price2: quote.price2?.toString() ?? "0",
+      date2: formatDate(quote.date2),
+      supplier3: quote.supplier3 ?? "",
+      price3: quote.price3?.toString() ?? "0",
+      date3: formatDate(quote.date3)
+    } : {
       productId: 0,
       quantity: "0",
       unit: "",
       responsible: "",
       supplier1: "",
       price1: "0",
-      date1: new Date().toISOString(),
+      date1: new Date().toISOString().split('T')[0],
       supplier2: "",
       price2: "0",
-      date2: new Date().toISOString(),
+      date2: new Date().toISOString().split('T')[0],
       supplier3: "",
       price3: "0",
-      date3: new Date().toISOString()
+      date3: new Date().toISOString().split('T')[0]
     }
   });
 
@@ -47,7 +66,12 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
       const res = await apiRequest(
         quote ? "PATCH" : "POST",
         quote ? `/api/quotes/${quote.id}` : "/api/quotes",
-        data
+        {
+          ...data,
+          date1: data.date1 ? new Date(data.date1).toISOString() : null,
+          date2: data.date2 ? new Date(data.date2).toISOString() : null,
+          date3: data.date3 ? new Date(data.date3).toISOString() : null
+        }
       );
       return res.json();
     },
@@ -78,7 +102,10 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Produto</FormLabel>
-              <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={field.value.toString()}>
+              <Select 
+                onValueChange={(value) => field.onChange(Number(value))} 
+                value={field.value?.toString() ?? "0"}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um produto" />
@@ -104,7 +131,12 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
             <FormItem>
               <FormLabel>Quantidade</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" {...field} />
+                <Input 
+                  type="number" 
+                  step="0.01" 
+                  {...field} 
+                  value={field.value ?? "0"}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -118,7 +150,7 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
             <FormItem>
               <FormLabel>Unidade</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -132,7 +164,7 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
             <FormItem>
               <FormLabel>Responsável</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -149,7 +181,7 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
                 <FormItem>
                   <FormLabel>Fornecedor 1</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -163,7 +195,12 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
                 <FormItem>
                   <FormLabel>Preço 1</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" {...field} />
+                    <Input 
+                      type="number" 
+                      step="0.01" 
+                      {...field} 
+                      value={field.value ?? "0"}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -177,7 +214,11 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
                 <FormItem>
                   <FormLabel>Data 1</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} value={field.value?.split('T')[0]} />
+                    <Input 
+                      type="date" 
+                      {...field} 
+                      value={field.value ?? ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -194,7 +235,7 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
                 <FormItem>
                   <FormLabel>Fornecedor 2</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -208,7 +249,12 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
                 <FormItem>
                   <FormLabel>Preço 2</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" {...field} />
+                    <Input 
+                      type="number" 
+                      step="0.01" 
+                      {...field} 
+                      value={field.value ?? "0"}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -222,7 +268,11 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
                 <FormItem>
                   <FormLabel>Data 2</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} value={field.value?.split('T')[0]} />
+                    <Input 
+                      type="date" 
+                      {...field} 
+                      value={field.value ?? ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -239,7 +289,7 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
                 <FormItem>
                   <FormLabel>Fornecedor 3</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -253,7 +303,12 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
                 <FormItem>
                   <FormLabel>Preço 3</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" {...field} />
+                    <Input 
+                      type="number" 
+                      step="0.01" 
+                      {...field} 
+                      value={field.value ?? "0"}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -267,7 +322,11 @@ export function QuoteForm({ quote, onSuccess }: QuoteFormProps) {
                 <FormItem>
                   <FormLabel>Data 3</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} value={field.value?.split('T')[0]} />
+                    <Input 
+                      type="date" 
+                      {...field} 
+                      value={field.value ?? ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

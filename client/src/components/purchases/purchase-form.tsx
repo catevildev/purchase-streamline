@@ -27,16 +27,31 @@ export function PurchaseForm({ purchase, onSuccess }: PurchaseFormProps) {
     queryKey: ["/api/employees"]
   });
 
+  const formatDate = (date: Date | null | undefined) => {
+    if (!date) return "";
+    return new Date(date).toISOString().split('T')[0];
+  };
+
   const form = useForm<InsertPurchase>({
     resolver: zodResolver(insertPurchaseSchema),
-    defaultValues: purchase || {
+    defaultValues: purchase ? {
+      productId: purchase.productId,
+      quantity: purchase.quantity.toString(),
+      unit: purchase.unit,
+      supplier: purchase.supplier,
+      responsible: purchase.responsible,
+      approver: purchase.approver ?? "",
+      date: formatDate(purchase.date),
+      unitPrice: purchase.unitPrice.toString(),
+      totalValue: purchase.totalValue.toString()
+    } : {
       productId: 0,
       quantity: "0",
       unit: "",
       supplier: "",
       responsible: "",
       approver: "",
-      date: new Date().toISOString(),
+      date: new Date().toISOString().split('T')[0],
       unitPrice: "0",
       totalValue: "0"
     }
@@ -47,7 +62,10 @@ export function PurchaseForm({ purchase, onSuccess }: PurchaseFormProps) {
       const res = await apiRequest(
         purchase ? "PATCH" : "POST",
         purchase ? `/api/purchases/${purchase.id}` : "/api/purchases",
-        data
+        {
+          ...data,
+          date: new Date(data.date).toISOString()
+        }
       );
       return res.json();
     },
@@ -83,7 +101,7 @@ export function PurchaseForm({ purchase, onSuccess }: PurchaseFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Produto</FormLabel>
-              <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={field.value.toString()}>
+              <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString() ?? "0"}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um produto" />
@@ -114,6 +132,7 @@ export function PurchaseForm({ purchase, onSuccess }: PurchaseFormProps) {
                     type="number" 
                     step="0.01" 
                     {...field} 
+                    value={field.value ?? "0"}
                     onChange={(e) => {
                       field.onChange(e);
                       calculateTotal(e.target.value, form.getValues("unitPrice"));
@@ -132,7 +151,7 @@ export function PurchaseForm({ purchase, onSuccess }: PurchaseFormProps) {
               <FormItem>
                 <FormLabel>Unidade</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} value={field.value ?? ""} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -147,7 +166,7 @@ export function PurchaseForm({ purchase, onSuccess }: PurchaseFormProps) {
             <FormItem>
               <FormLabel>Fornecedor</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -161,7 +180,7 @@ export function PurchaseForm({ purchase, onSuccess }: PurchaseFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Responsável</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value ?? ""}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione um responsável" />
@@ -186,14 +205,14 @@ export function PurchaseForm({ purchase, onSuccess }: PurchaseFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Aprovador</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value ?? ""}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione um aprovador" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {employees?.filter(e => e.approver > 0).map((employee) => (
+                    {employees?.filter(e => e.approver && e.approver > 0).map((employee) => (
                       <SelectItem key={employee.id} value={employee.name}>
                         {employee.name}
                       </SelectItem>
@@ -213,7 +232,11 @@ export function PurchaseForm({ purchase, onSuccess }: PurchaseFormProps) {
             <FormItem>
               <FormLabel>Data</FormLabel>
               <FormControl>
-                <Input type="date" {...field} value={field.value?.split('T')[0]} />
+                <Input 
+                  type="date" 
+                  {...field} 
+                  value={field.value ?? ""}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -232,6 +255,7 @@ export function PurchaseForm({ purchase, onSuccess }: PurchaseFormProps) {
                     type="number" 
                     step="0.01" 
                     {...field} 
+                    value={field.value ?? "0"}
                     onChange={(e) => {
                       field.onChange(e);
                       calculateTotal(form.getValues("quantity"), e.target.value);
@@ -250,7 +274,13 @@ export function PurchaseForm({ purchase, onSuccess }: PurchaseFormProps) {
               <FormItem>
                 <FormLabel>Valor Total</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} readOnly />
+                  <Input 
+                    type="number" 
+                    step="0.01" 
+                    {...field} 
+                    value={field.value ?? "0"} 
+                    readOnly
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

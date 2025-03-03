@@ -24,7 +24,12 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
 
   const form = useForm<InsertProduct>({
     resolver: zodResolver(insertProductSchema),
-    defaultValues: product || {
+    defaultValues: product ? {
+      name: product.name,
+      category: product.category,
+      unit: product.unit,
+      supplier: product.supplier ?? ""
+    } : {
       name: "",
       category: "",
       unit: "",
@@ -69,7 +74,7 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
             <FormItem>
               <FormLabel>Nome</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -82,7 +87,7 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Categoria</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value ?? ""}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione uma categoria" />
@@ -107,7 +112,7 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Unidade</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value ?? ""}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione uma unidade" />
@@ -133,7 +138,7 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
             <FormItem>
               <FormLabel>Fornecedor Principal</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>

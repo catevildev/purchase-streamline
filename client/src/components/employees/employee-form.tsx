@@ -31,7 +31,13 @@ export function EmployeeForm({ employee, onSuccess }: EmployeeFormProps) {
 
   const form = useForm<InsertEmployee>({
     resolver: zodResolver(insertEmployeeSchema),
-    defaultValues: employee || {
+    defaultValues: employee ? {
+      name: employee.name,
+      email: employee.email,
+      phone: employee.phone ?? "",
+      department: employee.department,
+      approver: employee.approver
+    } : {
       name: "",
       email: "",
       phone: "",
@@ -77,7 +83,7 @@ export function EmployeeForm({ employee, onSuccess }: EmployeeFormProps) {
             <FormItem>
               <FormLabel>Nome</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -91,7 +97,7 @@ export function EmployeeForm({ employee, onSuccess }: EmployeeFormProps) {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" {...field} />
+                <Input type="email" {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -105,7 +111,7 @@ export function EmployeeForm({ employee, onSuccess }: EmployeeFormProps) {
             <FormItem>
               <FormLabel>Telefone</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -118,7 +124,7 @@ export function EmployeeForm({ employee, onSuccess }: EmployeeFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Departamento</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value ?? ""}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um departamento" />
@@ -144,7 +150,14 @@ export function EmployeeForm({ employee, onSuccess }: EmployeeFormProps) {
             <FormItem>
               <FormLabel>Nível de Aprovação</FormLabel>
               <FormControl>
-                <Input type="number" min="0" max="3" {...field} />
+                <Input 
+                  type="number" 
+                  min="0" 
+                  max="3" 
+                  {...field} 
+                  value={field.value?.toString() ?? "0"}
+                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
