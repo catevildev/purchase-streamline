@@ -59,8 +59,8 @@ export class MySQLStorage implements IStorage {
 
   async createSupplier(supplier: InsertSupplier): Promise<Supplier> {
     const [result] = await db.execute(
-      'INSERT INTO suppliers (name, email, phone, cnpj, address) VALUES (?, ?, ?, ?, ?)',
-      [supplier.name, supplier.email, supplier.phone, supplier.cnpj, supplier.address]
+      'INSERT INTO suppliers (name, email, phone) VALUES (?, ?, ?)',
+      [supplier.name, supplier.email, supplier.phone || null]
     );
     const id = (result as any).insertId;
     return { ...supplier, id };
@@ -68,8 +68,8 @@ export class MySQLStorage implements IStorage {
 
   async updateSupplier(id: number, supplier: InsertSupplier): Promise<Supplier> {
     await db.execute(
-      'UPDATE suppliers SET name = ?, email = ?, phone = ?, cnpj = ?, address = ? WHERE id = ?',
-      [supplier.name, supplier.email, supplier.phone, supplier.cnpj, supplier.address, id]
+      'UPDATE suppliers SET name = ?, email = ?, phone = ? WHERE id = ?',
+      [supplier.name, supplier.email, supplier.phone || null, id]
     );
     return { ...supplier, id };
   }
@@ -93,7 +93,7 @@ export class MySQLStorage implements IStorage {
   async createEmployee(employee: InsertEmployee): Promise<Employee> {
     const [result] = await db.execute(
       'INSERT INTO employees (name, email, phone, department, approver) VALUES (?, ?, ?, ?, ?)',
-      [employee.name, employee.email, employee.phone, employee.department, employee.approver]
+      [employee.name, employee.email, employee.phone || null, employee.department, employee.approver || null]
     );
     const id = (result as any).insertId;
     return { ...employee, id };
@@ -102,7 +102,7 @@ export class MySQLStorage implements IStorage {
   async updateEmployee(id: number, employee: InsertEmployee): Promise<Employee> {
     await db.execute(
       'UPDATE employees SET name = ?, email = ?, phone = ?, department = ?, approver = ? WHERE id = ?',
-      [employee.name, employee.email, employee.phone, employee.department, employee.approver, id]
+      [employee.name, employee.email, employee.phone || null, employee.department, employee.approver || null, id]
     );
     return { ...employee, id };
   }
@@ -126,7 +126,7 @@ export class MySQLStorage implements IStorage {
   async createProduct(product: InsertProduct): Promise<Product> {
     const [result] = await db.execute(
       'INSERT INTO products (name, category, unit, supplier) VALUES (?, ?, ?, ?)',
-      [product.name, product.category, product.unit, product.supplier]
+      [product.name, product.category, product.unit, product.supplier || null]
     );
     const id = (result as any).insertId;
     return { ...product, id };
@@ -135,7 +135,7 @@ export class MySQLStorage implements IStorage {
   async updateProduct(id: number, product: InsertProduct): Promise<Product> {
     await db.execute(
       'UPDATE products SET name = ?, category = ?, unit = ?, supplier = ? WHERE id = ?',
-      [product.name, product.category, product.unit, product.supplier, id]
+      [product.name, product.category, product.unit, product.supplier || null, id]
     );
     return { ...product, id };
   }
@@ -159,7 +159,21 @@ export class MySQLStorage implements IStorage {
   async createQuote(quote: InsertQuote): Promise<Quote> {
     const [result] = await db.execute(
       'INSERT INTO quotes (productId, quantity, unit, responsible, supplier1, price1, date1, supplier2, price2, date2, supplier3, price3, date3) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [quote.productId, quote.quantity, quote.unit, quote.responsible, quote.supplier1, quote.price1, quote.date1, quote.supplier2, quote.price2, quote.date2, quote.supplier3, quote.price3, quote.date3]
+      [
+        quote.productId,
+        quote.quantity,
+        quote.unit,
+        quote.responsible,
+        quote.supplier1 || null,
+        quote.price1 || null,
+        quote.date1 || null,
+        quote.supplier2 || null,
+        quote.price2 || null,
+        quote.date2 || null,
+        quote.supplier3 || null,
+        quote.price3 || null,
+        quote.date3 || null
+      ]
     );
     const id = (result as any).insertId;
     return { ...quote, id };
@@ -168,7 +182,22 @@ export class MySQLStorage implements IStorage {
   async updateQuote(id: number, quote: InsertQuote): Promise<Quote> {
     await db.execute(
       'UPDATE quotes SET productId = ?, quantity = ?, unit = ?, responsible = ?, supplier1 = ?, price1 = ?, date1 = ?, supplier2 = ?, price2 = ?, date2 = ?, supplier3 = ?, price3 = ?, date3 = ? WHERE id = ?',
-      [quote.productId, quote.quantity, quote.unit, quote.responsible, quote.supplier1, quote.price1, quote.date1, quote.supplier2, quote.price2, quote.date2, quote.supplier3, quote.price3, quote.date3, id]
+      [
+        quote.productId,
+        quote.quantity,
+        quote.unit,
+        quote.responsible,
+        quote.supplier1 || null,
+        quote.price1 || null,
+        quote.date1 || null,
+        quote.supplier2 || null,
+        quote.price2 || null,
+        quote.date2 || null,
+        quote.supplier3 || null,
+        quote.price3 || null,
+        quote.date3 || null,
+        id
+      ]
     );
     return { ...quote, id };
   }
@@ -192,7 +221,17 @@ export class MySQLStorage implements IStorage {
   async createPurchase(purchase: InsertPurchase): Promise<Purchase> {
     const [result] = await db.execute(
       'INSERT INTO purchases (productId, quantity, unit, supplier, responsible, approver, date, unitPrice, totalValue) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [purchase.productId, purchase.quantity, purchase.unit, purchase.supplier, purchase.responsible, purchase.approver, purchase.date, purchase.unitPrice, purchase.totalValue]
+      [
+        purchase.productId,
+        purchase.quantity,
+        purchase.unit,
+        purchase.supplier,
+        purchase.responsible,
+        purchase.approver || null,
+        purchase.date,
+        purchase.unitPrice,
+        purchase.totalValue
+      ]
     );
     const id = (result as any).insertId;
     return { ...purchase, id };
@@ -201,7 +240,18 @@ export class MySQLStorage implements IStorage {
   async updatePurchase(id: number, purchase: InsertPurchase): Promise<Purchase> {
     await db.execute(
       'UPDATE purchases SET productId = ?, quantity = ?, unit = ?, supplier = ?, responsible = ?, approver = ?, date = ?, unitPrice = ?, totalValue = ? WHERE id = ?',
-      [purchase.productId, purchase.quantity, purchase.unit, purchase.supplier, purchase.responsible, purchase.approver, purchase.date, purchase.unitPrice, purchase.totalValue, id]
+      [
+        purchase.productId,
+        purchase.quantity,
+        purchase.unit,
+        purchase.supplier,
+        purchase.responsible,
+        purchase.approver || null,
+        purchase.date,
+        purchase.unitPrice,
+        purchase.totalValue,
+        id
+      ]
     );
     return { ...purchase, id };
   }
@@ -211,5 +261,4 @@ export class MySQLStorage implements IStorage {
   }
 }
 
-// Exportar a instância do storage
 export const storage = new MySQLStorage();
